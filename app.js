@@ -43,6 +43,8 @@ app.listen(3000, function(){
 var everyone = nowjs.initialize(app);		// everyone is initialized
 var users_hash = {};
 var rooms_hash = {};
+var CHAT_HISTORY_BUFFER_SIZE = 10;			// store 10 messages max
+var chat_messages = [];
 var user_count = 1;
 
 function create_rooms(n) {
@@ -108,4 +110,16 @@ everyone.now.join_room = function(room_id) {
 everyone.now.leave_room = function(room_id) {
 	var room_users = rooms_hash[room_id].users;
 	room_users.removeUser(this.user.clientId);	
+}
+
+everyone.now.submit_chat = function(message) {
+	var message_hash = {
+		text: message,
+		user: users_hash[this.user.clientId]
+	}
+	for (var client_id in users_hash) {
+		nowjs.getClient(client_id, function() {
+			this.now.update_chat_log(message_hash);
+		});
+	}
 }

@@ -10,7 +10,12 @@
 
 			// jquery shit
 			$().ready(function(){
-
+				$('.chat-input input').live('keypress', function(e) {
+					if (e.keyCode == 13) {
+						
+						now.submit_chat($(this).val());
+					}
+				});
 			});
 	
 			// nowjs shit. Each client has a now object, 
@@ -32,13 +37,37 @@
 				html += '</ul>';
 				$('.clients-list').html(html);
 			}
-	
+		
+			now.update_chat_log = function(message) {
+				var user = message.user,
+						text = message.text,
+						username = user.username;
+						
+				var html = '<div class="message"><span class="name">'+username+'</span>: '+text+'</div>';
+				$('.messages').append(html);
+			}
 	  </script>
 	</head>
 
 	<body>
-		<h1>Connected users:</h1>
-		<div class="clients-list">
+		<div class="container-game">
+			
+			<div class="game-board-wrapper"></div>
+			
+			<div class="sidebar">
+				<div class="users-wrapper">
+					<h2>Users</h2>
+					<div class="clients-list"></div>
+				</div>
+				<div class="chat-wrapper">
+					<h2>Chat</h2>
+					<div class="messages">
+					</div>
+					<div class="chat-input">
+						<input type="text" placeholder="enter a message"></input>
+					</div>
+				</div>
+			</div>
 			
 		</div>
 	</body>

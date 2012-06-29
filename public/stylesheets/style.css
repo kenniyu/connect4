@@ -1,9 +1,63 @@
 body {
-  padding: 50px;
+  padding: 30px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 	background: #fff url(../images/bg.png);
 }
 
 a {
   color: #00B7FF;
+}
+
+.container-game {
+	width: 1200px;
+	border: 1px solid black;
+	height: 650px;
+	margin: auto;
+	background-color: #eeeeee;
+}
+
+
+.container-game .game-board-wrapper {
+  margin: 10px 0;
+	width: 850px;
+	float: left;
+  height: 630px;
+  box-shadow: 1px 0 0 white;
+  border-right: 1px solid #E0E0E0;
+}
+
+.container-game .sidebar {
+	width: 329px;
+	float: left;
+  margin: 10px;
+  height: 630px;
+}
+
+.sidebar h2 {
+	text-align: center;
+}
+
+.sidebar .users-wrapper {
+	box-shadow: 0 1px 0 white;
+  border-bottom: 1px solid #E0E0E0;
+}
+
+.sidebar .chat-wrapper {
+	width: 100%;
+}
+
+.sidebar .message {
+	padding: 5px;
+}
+
+.sidebar .message .name {
+	font-weight: bold;
+}
+
+.sidebar .messages .message:nth-child(odd) {
+	background-color: #fff;
+}
+
+.sidebar .messages .message:nth-child(even) {
+	background-color: #eee;
 }
