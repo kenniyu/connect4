@@ -1,0 +1,46 @@
+<html>
+
+	<head>
+	  <title>Connect 4</title>
+
+		<link rel='stylesheet' href='../stylesheets/style.css' />
+	  <script type="text/javascript" src="javascripts/jquery.min.js"></script>
+	  <script type="text/javascript" src="/nowjs/now.js"></script>
+	  <script type="text/javascript">
+
+			// jquery shit
+			$().ready(function(){
+
+			});
+	
+			// nowjs shit. Each client has a now object, 
+			// a namespace shared between the server and this client. 
+			// The server calls these now.whatever functions
+	
+			now.update_clients_list_callback = function(users_hash) {
+				// update the list of clients we show (connect callback)
+				var html = '<ul>',
+						username,
+						user_obj;
+				
+				for (var client_id in users_hash) {
+					user_obj = users_hash[client_id];
+					username = user_obj.username;
+					html += '<li class="name">' + username + '</li>';
+				}
+		
+				html += '</ul>';
+				$('.clients-list').html(html);
+			}
+	
+	  </script>
+	</head>
+
+	<body>
+		<h1>Connected users:</h1>
+		<div class="clients-list">
+			
+		</div>
+	</body>
+
+</html>
