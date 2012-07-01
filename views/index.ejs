@@ -7,13 +7,36 @@
 	  <script type="text/javascript" src="javascripts/jquery.min.js"></script>
 	  <script type="text/javascript" src="/nowjs/now.js"></script>
 	  <script type="text/javascript">
-
+			
+			var TIME_TO_IDLE = 60000,			// 1 min (in ms)
+					last_mouse_move = (new Date()).getTime();
+			
+			function format_idle_time(time_in_ms) {
+ 				var minutes = time_in_ms/60000;
+				if (minutes >= 60) {
+					return '> 1h';
+				} else if (minutes >= 1) {
+					return Math.floor(minutes) + 'm';
+				} else {
+					return '';
+				}
+			}
+			
 			// jquery shit
 			$().ready(function(){
 				$('.chat-input input').live('keypress', function(e) {
 					if (e.keyCode == 13) {
 						
 						now.submit_chat($(this).val());
+						$(this).val('');
+					}
+				});
+				
+				$('html').mousemove(function() {
+					var current_time = (new Date()).getTime();
+					if (current_time - last_mouse_move > 3000) {
+						now.update_last_active_time();
+						last_mouse_move = current_time;
 					}
 				});
 			});
@@ -25,13 +48,20 @@
 			now.update_clients_list_callback = function(users_hash) {
 				// update the list of clients we show (connect callback)
 				var html = '<ul>',
+						user_obj,
+						user_id,
 						username,
-						user_obj;
+						status,
+						current_time = (new Date()).getTime();
 				
 				for (var client_id in users_hash) {
-					user_obj = users_hash[client_id];
-					username = user_obj.username;
-					html += '<li class="name">' + username + '</li>';
+					user_obj 		= users_hash[client_id];
+					user_id 		= user_obj.id;
+					username 		= user_obj.username;
+					last_active = user_obj.last_active;
+					status 			= (last_active + TIME_TO_IDLE < current_time) ? 'idle' : 'active';
+					idle_time 	= format_idle_time((new Date()).getTime() - last_active);
+					html += '<li class="name" data-user-id="' + user_id + '"><div class="status ' + status + '"></div>' + username + '<span class="idle-time">' + idle_time + '</span></li>';
 				}
 		
 				html += '</ul>';
@@ -39,13 +69,64 @@
 			}
 		
 			now.update_chat_log = function(message) {
-				var user = message.user,
-						text = message.text,
-						username = user.username;
+				var user 			= message.user,
+						text 			= message.text,
+						username 	= user.username;
 						
 				var html = '<div class="message"><span class="name">'+username+'</span>: '+text+'</div>';
 				$('.messages').append(html);
+				$('.messages').prop({ scrollTop: $('.messages').prop('scrollHeight') });
 			}
+			
+			now.preload_chat = function(chat_messages) {
+				var user,
+						text,
+						username,
+						message_hash,
+						chat_messages_length = chat_messages.length;
+				
+				var html = '';
+				for (var i = 0; i < chat_messages_length; i++) {
+					message_hash 	= chat_messages[i];
+					user 					= message_hash.user;
+					username 			= user.username;
+					text 					= message_hash.text;
+					html += '<div class="message"><span class="name">'+username+'</span>: '+text+'</div>';
+				}
+				$('.messages').append(html);
+				$('.messages').prop({ scrollTop: $('.messages').prop('scrollHeight') });
+			}
+			
+			now.update_users_status = function(active_users, idle_users) {
+				var user_obj,
+						user_id,
+						last_active,
+						active_users_length = active_users.length,
+						idle_users_length 	= idle_users.length,
+						current_time = (new Date()).getTime();
+						
+				for (var i = 0; i < active_users_length; i++) {
+					user_obj 		= active_users[i];
+					user_id 		= user_obj.id;
+					$('li.name[data-user-id="' + user_id + '"]').find('.status').removeClass('idle').addClass('active');
+					$('li.name[data-user-id="' + user_id + '"]').find('.idle-time').empty();
+				}
+				for (var i = 0; i < idle_users_length; i++) {
+					user_obj 		= idle_users[i];
+					user_id 		= user_obj.id;
+					last_active = user_obj.last_active;
+					idle_time		= format_idle_time(current_time - last_active);
+					$('li.name[data-user-id="' + user_id + '"]').find('.status').removeClass('active').addClass('idle');
+					$('li.name[data-user-id="' + user_id + '"]').find('.idle-time').text(idle_time);
+				}
+			}
+			
+			now.set_status_active = function(user_obj) {
+				var user_id = user_obj.id;
+				$('li.name[data-user-id="' + user_id + '"]').find('.status').removeClass('idle').addClass('active');
+				$('li.name[data-user-id="' + user_id + '"]').find('.idle-time').empty();
+			}
+			
 	  </script>
 	</head>
 
@@ -56,11 +137,11 @@
 			
 			<div class="sidebar">
 				<div class="users-wrapper">
-					<h2>Users</h2>
+					<div class="heading">nerds</div>
 					<div class="clients-list"></div>
 				</div>
 				<div class="chat-wrapper">
-					<h2>Chat</h2>
+					<div class="heading">chat</div>
 					<div class="messages">
 					</div>
 					<div class="chat-input">

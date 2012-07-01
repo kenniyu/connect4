@@ -7,7 +7,6 @@ var express = require('express'),
 		routes = require('./routes'),
 		connect = require('connect'),
 		ejs = require('ejs'),
-		sass = require('sass'),
 		nowjs = require('now');
 	
 var app = module.exports = express.createServer();
@@ -40,12 +39,13 @@ app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
 
-var everyone = nowjs.initialize(app);		// everyone is initialized
-var users_hash = {};
-var rooms_hash = {};
-var CHAT_HISTORY_BUFFER_SIZE = 10;			// store 10 messages max
-var chat_messages = [];
-var user_count = 1;
+var everyone = nowjs.initialize(app),		// everyone is initialized
+		users_hash = {},
+		rooms_hash = {},
+		CHAT_HISTORY_BUFFER_SIZE = 10,			// store 10 messages max
+		TIME_TO_IDLE = 60000,								// 1 min (in ms)
+		chat_messages = [],
+		user_count = 1;
 
 function create_rooms(n) {
 	var room_key,
@@ -69,6 +69,42 @@ function update_clients_list() {
 	}
 }
 
+function add_to_chat_history(message_hash) {
+	var chat_messages_length = chat_messages.length;
+	if (chat_messages_length >= CHAT_HISTORY_BUFFER_SIZE) {
+		// remove the first one
+		chat_messages.splice(0,1);
+	}
+	// push the message_hash
+	chat_messages.push(message_hash);
+}
+
+function update_last_active_time(client_id) {
+	var user = users_hash[client_id];
+	user.last_active = (new Date()).getTime();
+	
+	everyone.now.set_status_active(user);
+}
+
+function check_users_status() {
+	var user,
+			active_users = [],
+			idle_users = [],
+			current_time = (new Date()).getTime();
+	
+	for (var client_id in users_hash) {
+		user = users_hash[client_id];
+		if (user.last_active + TIME_TO_IDLE < current_time) {
+			// user has been inactive for more than a minute
+			idle_users.push(user);
+		} else {
+			active_users.push(user);
+		}
+	}
+	
+	everyone.now.update_users_status(active_users, idle_users);
+}
+
 // when a client connects to this page
 nowjs.on('connect', function() {	
 	// get user data
@@ -79,9 +115,10 @@ nowjs.on('connect', function() {
 	// set user id and name
 	user_key = client_id;
 	user_value = {
-		'id': client_id,
-		'username': username,
-		'current_room_id': -1
+		id: client_id,
+		username: username,
+		current_room_id: -1,
+		last_active: (new Date()).getTime()
 	}
 	
 	// add user to hash
@@ -92,6 +129,12 @@ nowjs.on('connect', function() {
 	
 	// update everyone's client list
 	update_clients_list();
+	
+	// preload this client's chatbox
+	nowjs.getClient(client_id, function() {
+		this.now.preload_chat(chat_messages);
+	});
+
 });
 
 // when a client disconnects from the page
@@ -113,13 +156,20 @@ everyone.now.leave_room = function(room_id) {
 }
 
 everyone.now.submit_chat = function(message) {
+	update_last_active_time(this.user.clientId);
 	var message_hash = {
 		text: message,
 		user: users_hash[this.user.clientId]
 	}
-	for (var client_id in users_hash) {
-		nowjs.getClient(client_id, function() {
-			this.now.update_chat_log(message_hash);
-		});
-	}
+	add_to_chat_history(message_hash);
+	everyone.now.update_chat_log(message_hash);
 }
+
+everyone.now.update_last_active_time = function() {
+	update_last_active_time(this.user.clientId);
+}
+
+setInterval(function() {
+	// check active/idle status time every 10 seconds
+	check_users_status();
+}, 10000);
