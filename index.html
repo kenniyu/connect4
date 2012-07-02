@@ -1,0 +1,98 @@
+<html>
+	<head>
+		<script type="text/javascript" src="game_logic.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+		<script type="text/javascript">
+		$(document).ready(function(){
+			console.log('in ready in header');
+			init_users();
+			console.log('init_users called');
+
+			$("#player1").append(player1);
+			$("#player2").append(player2);
+			$("#current_player").append(player1);
+
+			//console.log('init_game called');
+
+			$("button").click(function(){
+   				print_board();
+   				start_game();
+			});
+		});
+		</script>
+		<title>Connect4</title>
+	</head>
+	<body>
+		<h1>Welcome to Connect4!</h1>
+		<p id='player1'>Player1: </p>
+		<p id='player2'>Player2: </p>
+		<p id='current_player'>Current Player: </p>
+		<p>Current board status:</p>
+		<table>
+			<tr>
+				<th>0</th>
+				<th>1</th>
+				<th>2</th>
+				<th>3</th>
+				<th>4</th>
+				<th>5</th>
+				<th>6</th>
+			</tr>
+			<tr>
+				<td class='row0' id='col0'>x</td>
+				<td class='row0' id='col1'>x</td>
+				<td class='row0' id='col2'>x</td>
+				<td class='row0' id='col3'>x</td>
+				<td class='row0' id='col4'>x</td>
+				<td class='row0' id='col5'>x</td>
+				<td class='row0' id='col6'>x</td>
+			</tr>
+			<tr>
+				<td class='row1' id='col0'>x</td>
+				<td class='row1' id='col1'>x</td>
+				<td class='row1' id='col2'>x</td>
+				<td class='row1' id='col3'>x</td>
+				<td class='row1' id='col4'>x</td>
+				<td class='row1' id='col5'>x</td>
+				<td class='row1' id='col6'>x</td>
+			</tr>
+			<tr>
+				<td class='row2' id='col0'>x</td>
+				<td class='row2' id='col1'>x</td>
+				<td class='row2' id='col2'>x</td>
+				<td class='row2' id='col3'>x</td>
+				<td class='row2' id='col4'>x</td>
+				<td class='row2' id='col5'>x</td>
+				<td class='row2' id='col6'>x</td>
+			</tr>
+			<tr>
+				<td class='row3' id='col0'>x</td>
+				<td class='row3' id='col1'>x</td>
+				<td class='row3' id='col2'>x</td>
+				<td class='row3' id='col3'>x</td>
+				<td class='row3' id='col4'>x</td>
+				<td class='row3' id='col5'>x</td>
+				<td class='row3' id='col6'>x</td>
+			</tr>
+			<tr>
+				<td class='row4' id='col0'>x</td>
+				<td class='row4' id='col1'>x</td>
+				<td class='row4' id='col2'>x</td>
+				<td class='row4' id='col3'>x</td>
+				<td class='row4' id='col4'>x</td>
+				<td class='row4' id='col5'>x</td>
+				<td class='row4' id='col6'>x</td>
+			</tr>
+			<tr>
+				<td class='row5' id='col0'>x</td>
+				<td class='row5' id='col1'>x</td>
+				<td class='row5' id='col2'>x</td>
+				<td class='row5' id='col3'>x</td>
+				<td class='row5' id='col4'>x</td>
+				<td class='row5' id='col5'>x</td>
+				<td class='row5' id='col6'>x</td>
+			</tr>
+		</table>
+		<button type="button">Start!</button> 
+	</body>
+</html>
