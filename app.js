@@ -61,12 +61,8 @@ function create_rooms(n) {
 	}
 }
 
-function update_clients_list() {
-	for (var client_id in users_hash) {
-		nowjs.getClient(client_id, function() {
-			this.now.update_clients_list_callback(users_hash);
-		});
-	}
+function everyone_update_clients_list() {
+	everyone.now.update_clients_list_callback(users_hash);
 }
 
 function add_to_chat_history(message_hash) {
@@ -128,7 +124,7 @@ nowjs.on('connect', function() {
 	user_count++;	
 	
 	// update everyone's client list
-	update_clients_list();
+	everyone_update_clients_list();
 	
 	// preload this client's chatbox
 	nowjs.getClient(client_id, function() {
@@ -141,6 +137,7 @@ nowjs.on('connect', function() {
 nowjs.on('disconnect', function() {
 	var client_id = this.user.clientId;
 	delete users_hash[client_id];
+	everyone_update_clients_list();
 });
 
 // everyone.now is a shared namespace on the server side 
