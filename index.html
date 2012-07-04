@@ -1,23 +1,25 @@
 <html>
 	<head>
 		<script type="text/css" src="game_board_style.css"></script>
+		<LINK href="game_board_style.css" rel="stylesheet" type="text/css"></LINK>
 		<script type="text/javascript" src="game_logic.js"></script>
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 		<script type="text/javascript">
 		$(document).ready(function(){
 			console.log('in ready in header');
 			init_users();
-			console.log('init_users called');
+			init_game();
+			print_board();
+			console.log('init_users/init_game called');
 
 			$("#player1").append(player1);
 			$("#player2").append(player2);
 			$("#current_player").append(player1);
 
-			//console.log('init_game called');
-
-			$("button").click(function(){
-   				print_board();
-   				start_game();
+			$('#user_form').submit(function(e){
+				alert('submit');
+				e.preventDefault();
+				return validate_user_input(this);
 			});
 		});
 		</script>
@@ -40,7 +42,7 @@
 				<th>6</th>
 			</tr>
 			<tr>
-				<td data-row-number="0" data-row-number="1">x</td>
+				<td class='row0' id='col0'>x</td>
 				<td class='row0' id='col1'>x</td>
 				<td class='row0' id='col2'>x</td>
 				<td class='row0' id='col3'>x</td>
@@ -94,6 +96,11 @@
 				<td class='row5' id='col6'>x</td>
 			</tr>
 		</table>
-		<button type="button">Start!</button> 
+		<!-- button type="button">Start!</button --> 
+		<br />
+		<form id="user_form" name="user_input" method="post">
+			Column: <input type="text" name="chosen_col" />
+			<input type="submit" value="submit"/>
+		</form> 
 	</body>
 </html>
