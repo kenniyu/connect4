@@ -25,9 +25,9 @@
 			// jquery shit
 			$().ready(function(){
 				$('.chat-input input').live('keypress', function(e) {
-					if (e.keyCode == 13) {
-						
-						now.submit_chat($(this).val());
+          var text_input = $(this).val();
+					if (e.keyCode == 13 && text_input != '') {
+						now.submit_chat(text_input);
 						$(this).val('');
 					}
 				});
@@ -69,29 +69,21 @@
 			}
 		
 			now.update_chat_log = function(message) {
-				var user 			= message.user,
-						text 			= message.text,
-						username 	= user.username;
-						
-				var html = '<div class="message"><span class="name">'+username+'</span>: '+text+'</div>';
-				$('.messages').append(html);
+				var	html_string	= message.html_string;
+				$('.messages').append(html_string);
 				$('.messages').prop({ scrollTop: $('.messages').prop('scrollHeight') });
 			}
 			
 			now.preload_chat = function(chat_messages) {
-				var user,
-						text,
-						username,
+				var html = '',
+						html_string,
 						message_hash,
 						chat_messages_length = chat_messages.length;
 				
-				var html = '';
 				for (var i = 0; i < chat_messages_length; i++) {
-					message_hash 	= chat_messages[i];
-					user 					= message_hash.user;
-					username 			= user.username;
-					text 					= message_hash.text;
-					html += '<div class="message"><span class="name">'+username+'</span>: '+text+'</div>';
+					message_hash	= chat_messages[i],
+					html_string		= message_hash.html_string;
+					html += html_string;
 				}
 				$('.messages').append(html);
 				$('.messages').prop({ scrollTop: $('.messages').prop('scrollHeight') });
@@ -111,6 +103,7 @@
 					$('li.name[data-user-id="' + user_id + '"]').find('.status').removeClass('idle').addClass('active');
 					$('li.name[data-user-id="' + user_id + '"]').find('.idle-time').empty();
 				}
+
 				for (var i = 0; i < idle_users_length; i++) {
 					user_obj 		= idle_users[i];
 					user_id 		= user_obj.id;

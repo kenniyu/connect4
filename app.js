@@ -75,11 +75,27 @@ function add_to_chat_history(message_hash) {
 	chat_messages.push(message_hash);
 }
 
-function update_last_active_time(client_id) {
-	var user = users_hash[client_id];
-	user.last_active = (new Date()).getTime();
-	
-	everyone.now.set_status_active(user);
+function update_last_active_time(user_obj) {
+	user_obj.last_active = (new Date()).getTime();
+	everyone.now.set_status_active(user_obj);
+}
+
+function broadcast_message(user_obj, type, chat_text) {
+	console.log(user_obj);
+	var username = user_obj.username,
+			message_hash = {
+				'leave'		:	'<div class="message passive"><span class="name">' + username + '</span> has left the game</div>',
+				'join'		: '<div class="message passive"><span class="name">' + username + '</span> has joined the game</div>', 
+				'chat'		: '<div class="message active"><span class="name">' + username + '</span>: ' + chat_text + '</div>'
+			},
+			message_hash = {
+				type: type,
+				html_string: message_hash[type],
+				user: user_obj
+			};
+	console.log(message_hash);
+	add_to_chat_history(message_hash);
+	everyone.now.update_chat_log(message_hash);
 }
 
 function check_users_status() {
@@ -117,11 +133,17 @@ nowjs.on('connect', function() {
 		last_active: (new Date()).getTime()
 	}
 	
+	
 	// add user to hash
 	users_hash[user_key] = user_value;
 
 	// increment user count
 	user_count++;	
+	
+	// broadcast join
+	
+	user_obj = users_hash[client_id];
+	broadcast_message(user_obj, 'join');
 	
 	// update everyone's client list
 	everyone_update_clients_list();
@@ -135,7 +157,9 @@ nowjs.on('connect', function() {
 
 // when a client disconnects from the page
 nowjs.on('disconnect', function() {
-	var client_id = this.user.clientId;
+	var client_id = this.user.clientId,
+			user_obj	= users_hash[client_id];
+	broadcast_message(user_obj, 'leave');
 	delete users_hash[client_id];
 	everyone_update_clients_list();
 });
@@ -153,17 +177,17 @@ everyone.now.leave_room = function(room_id) {
 }
 
 everyone.now.submit_chat = function(message) {
-	update_last_active_time(this.user.clientId);
-	var message_hash = {
-		text: message,
-		user: users_hash[this.user.clientId]
-	}
-	add_to_chat_history(message_hash);
-	everyone.now.update_chat_log(message_hash);
+	var client_id 	= this.user.clientId,
+			user_obj 		= users_hash[client_id],
+			type 				=	'chat';
+	update_last_active_time(user_obj);
+	broadcast_message(user_obj, type, message);
 }
 
 everyone.now.update_last_active_time = function() {
-	update_last_active_time(this.user.clientId);
+	var client_id = this.user.clientId,
+			user_obj 	= users_hash[client_id];
+	update_last_active_time(user_obj);
 }
 
 setInterval(function() {
